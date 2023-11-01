@@ -11,6 +11,7 @@ export interface configUpdates {
 
 export default function Home() {
   const [sessionStatus, setSessionStatus] = useState({
+    sessionNumber: 0,
     stage: "focus_1",
     timedPreviously: 0,
     timeStarted: 0,
@@ -43,6 +44,7 @@ export default function Home() {
     const timeStarted = playerConfig.playing ? 0 : Date.now();
     setSessionStatus({
       ...sessionStatus,
+      sessionNumber: sessionStatus.sessionNumber + 1,
       timedPreviously,
       timeStarted
     })
@@ -56,6 +58,7 @@ export default function Home() {
     const videoURL = stages[sessionStatus.stage].next.startsWith('refresh') ? config.refreshVideo : stages[sessionStatus.stage].next.startsWith('break') ? config.breakVideo : config.focusVideo;
 
     setSessionStatus({
+      sessionNumber: sessionStatus.sessionNumber + 1,
       stage: stages[sessionStatus.stage].next,
       timedPreviously: 0,
       timeStarted: Date.now()
@@ -67,7 +70,7 @@ export default function Home() {
     const sessionDuration = sessionStatus.stage.startsWith('refresh') ? config.refresherDuration : sessionStatus.stage.startsWith('break') ? config.breakDuration : config.focusDuration; 
     const timePlayed = sessionStatus.timedPreviously + (Date.now() - sessionStatus.timeStarted);
     
-    if (timePlayed > sessionDuration) {
+    if (timePlayed > sessionDuration && sessionStatus.sessionNumber > 0) {
       moveToNextPart()
     }
   }
