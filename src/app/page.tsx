@@ -6,8 +6,18 @@ import ConfigModal from './components/ConfigModal';
 import { stages, minutes } from './lib/util';
 
 export interface configUpdates {
-  [key : string] : string | number 
+  [key : string] : string | number,
 }
+
+export interface configInterface { 
+  focusVideo : string,
+  breakVideo : string,
+  focusDuration : number,
+  breakDuration : number,
+  rounds : number,
+  refresherDuration : number,
+  refreshVideo : string
+} 
 
 export default function Home() {
   const [sessionStatus, setSessionStatus] = useState({
@@ -18,6 +28,14 @@ export default function Home() {
   });
 
   const [showConfigModal, setshowConfigModal] = useState(false);
+
+  const getStoredConfig  = (key : string) : (string | null) => {
+    const value = JSON.parse(localStorage.getItem('config_'+key) || '');
+    if(value === '') {
+      return null
+    }
+    return value
+  }
 
   const [config, setConfig] = useState({
     focusVideo: "https://www.youtube.com/watch?v=yIQd2Ya0Ziw&ab_channel=Calm",
@@ -35,7 +53,6 @@ export default function Home() {
     controls: true,
     playing: false,
   });
-
 
   // play pause
 
@@ -74,8 +91,23 @@ export default function Home() {
       moveToNextPart()
     }
   }
+  
+  const updateConfig = (updatedConfig : configUpdates) => {
+    const updateConfig : any = {...config, ...updatedConfig};
+    Object.keys((key: string) => {
+      localStorage.setItem('config_'+key, JSON.stringify(updateConfig[key]))
+    })     
+    setConfig(updateConfig)
+  }
 
-  const updateConfig = (updatedConfig : configUpdates) => { setConfig({...config, ...updatedConfig})}
+  const onPlayerReady = () => {
+    setConfig({
+      ...config,
+    focusVideo: getStoredConfig("focusVideo") || "https://www.youtube.com/watch?v=yIQd2Ya0Ziw&ab_channel=Calm",
+    breakVideo: getStoredConfig("breakVideo") || "https://www.youtube.com/watch?v=MZhivjxcF-M&ab_channel=LofiEveryday",
+    refreshVideo: getStoredConfig("refreshVideo") || "https://www.youtube.com/watch?v=Gcy35RLo8_0&ab_channel=ZYCheng",
+    })
+  } 
 
 
   return (
@@ -88,6 +120,7 @@ export default function Home() {
           onProgress={checkforStageJump}
           width="80vw"
           height="45vw"
+          onReady={onPlayerReady}
           style={{
             maxHeight:"675px",
             maxWidth: "1200px"
