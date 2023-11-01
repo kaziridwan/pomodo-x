@@ -95,8 +95,7 @@ export default function Home() {
       </div>
       <div className='bg-slate-500 h-40 flex'>
         <div className="bg-slate-400 flex-grow">
-          {sessionStatus.timedPreviously} +
-          {sessionStatus.timeStarted}
+          ~
         </div>
         <div 
           className="w-40 cursor-pointer select-none flex flex-col items-center justify-center" 
