@@ -5,6 +5,10 @@ import ReactPlayer from 'react-player'
 import ConfigModal from './components/ConfigModal';
 import { stages, minutes } from './lib/util';
 
+export interface configUpdates {
+  [key : string] : string | number 
+}
+
 export default function Home() {
   const [sessionStatus, setSessionStatus] = useState({
     stage: "focus_1",
@@ -68,9 +72,6 @@ export default function Home() {
     }
   }
 
-  interface configUpdates {
-    [key : string] : string | number 
-  }
   const updateConfig = (updatedConfig : configUpdates) => { setConfig({...config, ...updatedConfig})}
 
 
