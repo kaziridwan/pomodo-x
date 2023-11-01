@@ -79,7 +79,17 @@ export default function Home() {
     <main className="flex min-h-screen bg-emerald-200 flex-col">
       <ConfigModal config={config} updateConfig={updateConfig} show={showConfigModal} hideConfigModal={() => setshowConfigModal(false)} />
       <div className="bg-emerald-100 flex-grow flex items-center justify-center">
-        <ReactPlayer {...playerConfig} progressInterval={5000} onProgress={checkforStageJump}/>
+        <ReactPlayer 
+          {...playerConfig} 
+          progressInterval={5000} 
+          onProgress={checkforStageJump}
+          width="80vw"
+          height="45vw"
+          style={{
+            maxHeight:"675px",
+            maxWidth: "1200px"
+          }}
+        />
       </div>
       <div className='bg-slate-500 h-40 flex'>
         <div className="bg-slate-400 flex-grow flex items-end">
@@ -89,15 +99,16 @@ export default function Home() {
           </div>
         </div>
         <div 
-          className="w-40 cursor-pointer select-none flex flex-col items-center justify-center" 
+          className="w-40 cursor-pointer select-none flex flex-col items-center justify-center [&_.mainAlert]:hover:hidden [&_.doubleClickAlert]:hover:block" 
           onClick={playpause}
           onDoubleClick={moveToNextPart}
         >
           <div className="text-2xl">
-            {playerConfig.playing ? 'Playing' : 'Paused'}
+            {playerConfig.playing ? 'Playing..' : '..Paused'}
           </div>
-          <div className="text-xs text-slate-700">
-            {sessionStatus.stage}
+          <div className="text-xs text-slate-700 mt-2">
+            <div className="mainAlert">{sessionStatus.stage.startsWith('refresh') ? "refresher" : sessionStatus.stage.startsWith('break') ? "break" : "focus"}</div>
+            <div className="doubleClickAlert hidden text-slate-400">double click to skip</div>
           </div>
         </div>
       </div>
