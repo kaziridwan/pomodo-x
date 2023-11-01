@@ -2,7 +2,11 @@
 import { useState } from 'react'
 import ReactPlayer from 'react-player'
 
-const minutes = (minCount: number) => (minCount*60*1000);
+import ConfigModal from './components/ConfigModal';
+
+export const minutes = (minCount: number) => (minCount*60*1000);
+export const toMinutes = (msCount: number) => (msCount/(60*1000));
+
 const stages = {
   "focus_1": {
     previous: "refresh",
@@ -32,6 +36,8 @@ export default function Home() {
     timedPreviously: 0,
     timeStarted: 0,
   });
+
+  const [showConfigModal, setshowConfigModal] = useState(false);
 
   const [config, setConfig] = useState({
     focusVideo: "https://www.youtube.com/watch?v=yIQd2Ya0Ziw&ab_channel=Calm",
@@ -87,15 +93,21 @@ export default function Home() {
     }
   }
 
+  const updateConfig = (updatedConfig) => { setConfig({...config, ...updatedConfig})}
+
 
   return (
     <main className="flex min-h-screen bg-emerald-200 flex-col">
+      <ConfigModal config={config} updateConfig={updateConfig} show={showConfigModal} hideConfigModal={() => setshowConfigModal(false)} />
       <div className="bg-emerald-100 flex-grow flex items-center justify-center">
         <ReactPlayer {...playerConfig} progressInterval={5000} onProgress={checkforStageJump}/>
       </div>
       <div className='bg-slate-500 h-40 flex'>
-        <div className="bg-slate-400 flex-grow">
-          ~
+        <div className="bg-slate-400 flex-grow flex items-end">
+          <div className="flex-grow"></div>
+          <div className="w-max px-2 flex flex-col items-center">
+            <div className="cursor-pointer text-amber-700 font-bold hover:text-amber-600" onClick={() => setshowConfigModal(true)}>conf</div>
+          </div>
         </div>
         <div 
           className="w-40 cursor-pointer select-none flex flex-col items-center justify-center" 
