@@ -2,6 +2,9 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
+Please use nvm to manage your node versions.
+Required node version is 20.9.0 .
+
 First, run the development server:
 
 ```bash
