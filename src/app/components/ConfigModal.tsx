@@ -1,6 +1,6 @@
 "use client"
 
-import { minutes, toMinutes } from "../page";
+import { minutes, toMinutes } from "../lib/util";
 
 const ConfigModal = ({config:{focusVideo, breakVideo, focusDuration, breakDuration, rounds, refresherDuration, refreshVideo}, updateConfig, show, hideConfigModal}) => {
   return (

@@ -3,32 +3,7 @@ import { useState } from 'react'
 import ReactPlayer from 'react-player'
 
 import ConfigModal from './components/ConfigModal';
-
-export const minutes = (minCount: number) => (minCount*60*1000);
-export const toMinutes = (msCount: number) => (msCount/(60*1000));
-
-const stages = {
-  "focus_1": {
-    previous: "refresh",
-    next: "break_1",
-  },
-  "break_1": {
-    previous: "focus_1",
-    next: "focus_2",
-  },
-  "focus_2": {
-    previous: "break_1",
-    next: "break_2",
-  },
-  "break_2": {
-    previous: "focus_2",
-    next: "refresh",
-  },
-  "refresh": {
-    previous: "break_2",
-    next: "focus_1",
-  },
-}
+import { stages, minutes } from './lib/util';
 
 export default function Home() {
   const [sessionStatus, setSessionStatus] = useState({
@@ -93,7 +68,10 @@ export default function Home() {
     }
   }
 
-  const updateConfig = (updatedConfig) => { setConfig({...config, ...updatedConfig})}
+  interface configUpdates {
+    [key : string] : string | number 
+  }
+  const updateConfig = (updatedConfig : configUpdates) => { setConfig({...config, ...updatedConfig})}
 
 
   return (
