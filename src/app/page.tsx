@@ -87,7 +87,7 @@ export default function Home() {
     const sessionDuration = sessionStatus.stage.startsWith('refresh') ? config.refresherDuration : sessionStatus.stage.startsWith('break') ? config.breakDuration : config.focusDuration; 
     const timePlayed = sessionStatus.timedPreviously + (Date.now() - sessionStatus.timeStarted);
     
-    if (timePlayed > sessionDuration && sessionStatus.sessionNumber > 0) {
+    if (timePlayed > sessionDuration && sessionStatus.sessionNumber > 0 && playerConfig.playing) {
       moveToNextPart()
     }
   }
