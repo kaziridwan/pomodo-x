@@ -7,11 +7,11 @@ const ConfigModal = ({ config: { focusVideo, breakVideo, focusDuration, breakDur
    config: { focusVideo : string, breakVideo : string, focusDuration : number, breakDuration : number, rounds : number, refresherDuration : number, refreshVideo : string} 
    updateConfig : (configUpdates : configUpdates) => void, show : boolean, hideConfigModal: () => void }) => {
   return (
-    <div className={`absolute h-screen w-screen bg-[rgba(0,0,0,0.2)] backdrop-blur-sm flex justify-center items-center ${!show ? 'hidden' : ''}`}>
-      <div className="flex h-1/2 w-6 justify-start text-3xl leading-[0] cursor-pointer hover:text-amber-700" onClick={hideConfigModal}>
+    <div className={`absolute h-screen w-screen bg-[rgba(0,0,0,0.2)] backdrop-blur flex justify-center items-center opacity-100 ${!show ? 'hidden opacity-0' : ''}`} onClick={hideConfigModal}>
+      <div className="flex h-1/2 w-6 justify-start text-3xl leading-[0] cursor-pointer hover:text-amber-700 transition-colors duration-300">
         ×
       </div>
-      <div className="w-1/2 h-1/2 rounded-md p-8 bg-[rgba(255,255,255,.9)] flex flex-col text-gray-900">
+      <div className="w-1/2 h-1/2 rounded-md p-8 bg-[rgba(255,255,255,.9)] flex flex-col text-gray-900" onClick={(e) => {e.stopPropagation()}}>
         <div className="text-2xl mb-8">
           Preferences
         </div>
