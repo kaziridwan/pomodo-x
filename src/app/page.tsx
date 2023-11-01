@@ -41,7 +41,7 @@ export default function Home() {
     focusVideo: "https://www.youtube.com/watch?v=yIQd2Ya0Ziw&ab_channel=Calm",
     breakChime: "",
     breakVideo: "https://www.youtube.com/watch?v=MZhivjxcF-M&ab_channel=LofiEveryday",
-    refreshVideo: "https://www.youtube.com/watch?v=Gcy35RLo8_0&ab_channel=ZYCheng",
+    refreshVideo: "https://www.youtube.com/watch?v=-hSma-BRzoo&ab_channel=OliverSjostrom",
     focusDuration: minutes(25),
     breakDuration: minutes(5),
     rounds: 4,
@@ -107,7 +107,7 @@ export default function Home() {
       ...config,
     focusVideo: getStoredConfig("focusVideo") || "https://www.youtube.com/watch?v=yIQd2Ya0Ziw&ab_channel=Calm",
     breakVideo: getStoredConfig("breakVideo") || "https://www.youtube.com/watch?v=MZhivjxcF-M&ab_channel=LofiEveryday",
-    refreshVideo: getStoredConfig("refreshVideo") || "https://www.youtube.com/watch?v=Gcy35RLo8_0&ab_channel=ZYCheng",
+    refreshVideo: getStoredConfig("refreshVideo") || "https://www.youtube.com/watch?v=-hSma-BRzoo&ab_channel=OliverSjostrom",
     })
   } 
 
