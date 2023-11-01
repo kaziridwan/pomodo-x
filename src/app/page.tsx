@@ -136,6 +136,15 @@ export default function Home() {
     });
   };
 
+  const handleClick = (event: { detail: number; }) => {
+    if (event.detail === 2) {
+      moveToNextPart()
+    } else {
+      playpause();
+    }
+    
+  }
+
   return (
     <main className="flex min-h-screen bg-emerald-200 flex-col">
       <ConfigModal
@@ -172,8 +181,7 @@ export default function Home() {
         </div>
         <div
           className="group w-40 cursor-pointer select-none flex flex-col items-center justify-center"
-          onClick={playpause}
-          onDoubleClick={moveToNextPart}
+          onClick={handleClick}
         >
           <div className="text-2xl">
             <span className="group-hover:hidden inline-block animate-pulse">
