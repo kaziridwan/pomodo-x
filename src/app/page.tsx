@@ -94,13 +94,15 @@ export default function Home() {
   
   const updateConfig = (updatedConfig : configUpdates) => {
     const updateConfig : any = {...config, ...updatedConfig};
-    Object.keys((key: string) => {
+    console.log('updatedConfig is', updateConfig)
+    Object.keys(updateConfig).map((key: string) => {
       localStorage.setItem('config_'+key, JSON.stringify(updateConfig[key]))
     })     
     setConfig(updateConfig)
   }
 
   const onPlayerReady = () => {
+    console.log('onPlayerReady')
     setConfig({
       ...config,
     focusVideo: getStoredConfig("focusVideo") || "https://www.youtube.com/watch?v=yIQd2Ya0Ziw&ab_channel=Calm",
