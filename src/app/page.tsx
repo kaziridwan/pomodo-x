@@ -1,6 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ReactPlayer from "react-player";
+
+import { useSearchParams } from 'next/navigation'
 
 import ConfigModal from "./components/ConfigModal";
 import { stages, minutes } from "./lib/util";
@@ -20,6 +22,9 @@ export interface configInterface {
 }
 
 export default function Home() {
+
+  const searchParams = useSearchParams();
+
   const [sessionStatus, setSessionStatus] = useState({
     sessionNumber: 0,
     stage: "focus_1",
@@ -28,6 +33,8 @@ export default function Home() {
   });
 
   const [showConfigModal, setshowConfigModal] = useState(false);
+
+  const refresherVideoURLOverride = decodeURIComponent(searchParams.get('refresherVideo') ?? '');
 
   const getStoredConfig = (key: string): string | null => {
     const value = JSON.parse(localStorage.getItem("config_" + key) || "");
@@ -144,6 +151,24 @@ export default function Home() {
     }
     
   }
+
+  useEffect(() => {
+    console.log('refresherVideoURLOverride', refresherVideoURLOverride);
+    // need to tie this up to an event / flag so that it doesnt mess up state update cycles
+    setConfig({
+      ...config,
+      refreshVideo: refresherVideoURLOverride
+    })
+    setSessionStatus({
+      sessionNumber: sessionStatus.sessionNumber + 1,
+      stage: 'refresh',
+      timedPreviously: 0,
+      timeStarted: Date.now(),
+    });
+    setTimeout(() => {
+      setPlayerConfig({ ...playerConfig, url: refresherVideoURLOverride, playing: true });
+    }, 1000);
+  }, [refresherVideoURLOverride])
 
   return (
     <main className="flex min-h-screen bg-emerald-200 flex-col">
