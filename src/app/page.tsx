@@ -35,7 +35,8 @@ export default function Home() {
 
   const [showConfigModal, setshowConfigModal] = useState(false);
 
-  const refresherVideoURLOverride = decodeURIComponent(searchParams.get('refresherVideo') ?? '');
+  const refresherVideoURLOverride_RAW = decodeURIComponent(searchParams.get('refresherVideo') ?? '');
+  const refresherVideoURLOverride = refresherVideoURLOverride_RAW.substring(1,refresherVideoURLOverride_RAW.length-1);
 
   const getStoredConfig = (key: string): string | null => {
     const value = JSON.parse(localStorage.getItem("config_" + key) || "");
