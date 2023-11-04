@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 
 import ConfigModal from "./components/ConfigModal";
 import { stages, minutes } from "./lib/util";
+import usePodcast from "./lib/usePodcast";
 
 export interface configUpdates {
   [key: string]: string | number;
@@ -63,6 +64,10 @@ export default function Home() {
     playing: false,
   });
 
+  const {feed, feedLoaded, setPodcast} = usePodcast('https://cdn.atp.fm/rss/public?a2ddltlm');
+
+  // get latest (or specific) podcast from url
+
   // play pause
 
   const playpause = () => {
@@ -92,6 +97,23 @@ export default function Home() {
     setSessionStatus({
       sessionNumber: sessionStatus.sessionNumber + 1,
       stage: stages[sessionStatus.stage].next,
+      timedPreviously: 0,
+      timeStarted: Date.now(),
+    });
+    setTimeout(() => {
+      setPlayerConfig({ ...playerConfig, url: videoURL, playing: true });
+    }, 1000);
+  };
+
+  // moveToPart() needs an architectural review
+  const playRefresher = () => {
+    setPlayerConfig({ ...playerConfig, playing: false });
+    // need to update the session first
+    const videoURL = config.refreshVideo;
+
+    setSessionStatus({
+      sessionNumber: sessionStatus.sessionNumber + 1,
+      stage: 'refresh',
       timedPreviously: 0,
       timeStarted: Date.now(),
     });
@@ -146,6 +168,8 @@ export default function Home() {
   const handleClick = (event: { detail: number; }) => {
     if (event.detail === 2) {
       moveToNextPart()
+    } else if (event.detail === 3) {
+      playRefresher();
     } else {
       playpause();
     }
@@ -165,6 +189,9 @@ export default function Home() {
       timedPreviously: 0,
       timeStarted: Date.now(),
     });
+    
+    updateConfig({refreshVideo: refresherVideoURLOverride})
+
     setTimeout(() => {
       setPlayerConfig({ ...playerConfig, url: refresherVideoURLOverride, playing: true });
     }, 1000);
@@ -181,6 +208,7 @@ export default function Home() {
       <div className="bg-emerald-100 flex-grow flex items-center justify-center h-0">
         <ReactPlayer
           {...playerConfig}
+          url={playerConfig.url}
           progressInterval={5000}
           onProgress={checkforStageJump}
           width="80vw"
