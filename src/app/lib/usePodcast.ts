@@ -4,7 +4,7 @@ import Parser from "rss-parser"
 const usePodcast = (rssLink = '') => {
   let parser = new Parser();
 
-  const [feed, updateFeed ] = useState();
+  const [feed, updateFeed ] = useState <{[key:string]:any}> ();
   const [feedLoaded, setFeedLoaded ] = useState(false);
   const [link, setLink] = useState(rssLink);
 
