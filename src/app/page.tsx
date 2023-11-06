@@ -35,8 +35,8 @@ export default function Home() {
     },
     tripplePress: () => {
       playRefresher();
-    }
-  });
+  }}, 300
+  );
 
   const [sessionStatus, setSessionStatus] = useState({
     sessionNumber: 0,
@@ -190,24 +190,25 @@ export default function Home() {
   }
 
   useEffect(() => {
-    console.log('refresherVideoURLOverride', refresherVideoURLOverride);
-    // need to tie this up to an event / flag so that it doesnt mess up state update cycles
-    setConfig({
-      ...config,
-      refreshVideo: refresherVideoURLOverride
-    })
-    setSessionStatus({
-      sessionNumber: sessionStatus.sessionNumber + 1,
-      stage: 'refresh',
-      timedPreviously: 0,
-      timeStarted: Date.now(),
-    });
-    
-    updateConfig({refreshVideo: refresherVideoURLOverride})
-
-    setTimeout(() => {
-      setPlayerConfig({ ...playerConfig, url: refresherVideoURLOverride, playing: true });
-    }, 1000);
+    if(refresherVideoURLOverride && refresherVideoURLOverride !== '') {
+      // need to tie this up to an event / flag so that it doesnt mess up state update cycles
+      setConfig({
+        ...config,
+        refreshVideo: refresherVideoURLOverride
+      })
+      setSessionStatus({
+        sessionNumber: sessionStatus.sessionNumber + 1,
+        stage: 'refresh',
+        timedPreviously: 0,
+        timeStarted: Date.now(),
+      });
+      
+      updateConfig({refreshVideo: refresherVideoURLOverride})
+  
+      setTimeout(() => {
+        setPlayerConfig({ ...playerConfig, url: refresherVideoURLOverride, playing: true });
+      }, 1000);
+    }
   }, [refresherVideoURLOverride])
 
   return (
