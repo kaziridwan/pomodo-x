@@ -5,8 +5,11 @@ export const useKeypress = (callback: () => void, key: string, {doublePress, tri
   let pressCount = 0;
   const timeoutRef : any = useRef(null); // quick fix lol
 
-  const onKeyDown = (event : { key: any; preventDefault: () => void; }) => {
+  const onKeyDown = (event : {
+    keyCode: any; key: any; preventDefault: () => void; 
+  }) => {
     console.log('pressed key = ',event.key)
+    console.log('pressed key = ',event.keyCode)
     console.log('pressed key = ',event.key === " ")
     const keyIsPressed = event.key === key;
 
@@ -20,22 +23,24 @@ export const useKeypress = (callback: () => void, key: string, {doublePress, tri
     }
     
     timeoutRef.current = setTimeout(() => {
-      if (!doublePress && !tripplePress) {
-        callback()
-      } else {
-        console.log(pressCount, doublePress, tripplePress)
-        if(pressCount === 2 && doublePress) {
-          doublePress();
-          console.log(' double press')
-        } else if(pressCount === 3 && tripplePress) {
-          tripplePress();
-          console.log(' tripple press')
+      if(keyIsPressed) {
+        if (!doublePress && !tripplePress) {
+          callback()
         } else {
-          callback();
-          console.log(' single press')
+          console.log(pressCount, doublePress, tripplePress)
+          if(pressCount === 2 && doublePress) {
+            doublePress();
+            console.log(' double press')
+          } else if(pressCount === 3 && tripplePress) {
+            tripplePress();
+            console.log(' tripple press')
+          } else {
+            callback();
+            console.log(' single press')
+          }
         }
+        pressCount = 0;
       }
-      pressCount = 0;
     }, delay);
   };
 

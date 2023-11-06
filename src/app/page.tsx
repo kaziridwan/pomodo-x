@@ -28,13 +28,19 @@ export default function Home() {
   const searchParams = useSearchParams();
 
   useKeypress(() => {
-    playpause();
+    if(!showConfigModal) {
+      playpause();
+    }
   }, ' ', {
     doublePress: () => {
-      moveToNextPart();
+      if(!showConfigModal) {
+        moveToNextPart();
+      }
     },
     tripplePress: () => {
-      playRefresher();
+      if(!showConfigModal) {
+        playRefresher();
+      }
   }}, 300
   );
 
