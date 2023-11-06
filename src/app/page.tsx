@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import ConfigModal from "./components/ConfigModal";
 import { stages, minutes } from "./lib/util";
 import usePodcast from "./lib/usePodcast";
+import { useKeypress } from "./lib/useKeypress";
 
 export interface configUpdates {
   [key: string]: string | number;
@@ -25,6 +26,17 @@ export interface configInterface {
 export default function Home() {
 
   const searchParams = useSearchParams();
+
+  useKeypress(() => {
+    playpause();
+  }, ' ', {
+    doublePress: () => {
+      moveToNextPart();
+    },
+    tripplePress: () => {
+      playRefresher();
+    }
+  });
 
   const [sessionStatus, setSessionStatus] = useState({
     sessionNumber: 0,
