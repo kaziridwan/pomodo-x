@@ -109,7 +109,7 @@ export default function Home() {
     // need to update the session first
     const videoURL = stages[sessionStatus.stage].next.startsWith("refresh")
       ? config.refreshVideo
-      : stages[sessionStatus.stage].next.startsWith("break")
+      : stages[sessionStatus.stage].next.startsWith("break_")
       ? config.breakVideo
       : config.focusVideo;
 
@@ -144,7 +144,7 @@ export default function Home() {
   const checkforStageJump = () => {
     const sessionDuration = sessionStatus.stage.startsWith("refresh")
       ? config.refresherDuration
-      : sessionStatus.stage.startsWith("break")
+      : sessionStatus.stage.startsWith("break_")
       ? config.breakDuration
       : config.focusDuration;
     const timePlayed =
@@ -268,7 +268,7 @@ export default function Home() {
             <div className="group-hover:hidden group-hover:opacity-0 block opacity-100">
               {sessionStatus.stage.startsWith("refresh")
                 ? "refresher"
-                : sessionStatus.stage.startsWith("break")
+                : sessionStatus.stage.startsWith("break_")
                 ? "break"
                 : "focus"}
             </div>
