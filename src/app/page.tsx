@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import ReactPlayer from "react-player";
 
 import { useSearchParams } from 'next/navigation'
 
 import ConfigModal from "./components/ConfigModal";
+import Player from "./components/Player";
+
 import { stages, minutes } from "./lib/util";
 import usePodcast from "./lib/usePodcast";
 import { useKeypress } from "./lib/useKeypress";
@@ -24,6 +25,7 @@ export interface configInterface {
 }
 
 export default function Home() {
+  // user config
 
   const searchParams = useSearchParams();
 
@@ -71,6 +73,7 @@ export default function Home() {
       "https://www.youtube.com/watch?v=MZhivjxcF-M&ab_channel=LofiEveryday",
     refreshVideo:
       "https://www.youtube.com/watch?v=-hSma-BRzoo&ab_channel=OliverSjostrom",
+      // "https://www.youtube.com/watch?v=TwOuh73cGGQ&ab_channel=TheBodyCoachTVbyJoeWicks",
     focusDuration: minutes(25),
     breakDuration: minutes(5),
     rounds: 4,
@@ -226,7 +229,7 @@ export default function Home() {
         hideConfigModal={() => setshowConfigModal(false)}
       />
       <div className="bg-emerald-100 flex-grow flex items-center justify-center h-0">
-        <ReactPlayer
+        <Player
           {...playerConfig}
           url={playerConfig.url}
           progressInterval={5000}
