@@ -9,8 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "jotai": "^2.7.0",
+    "jotai-optics": "^0.3.2",
+    "nanoid": "^5.0.6",
     "next": "14.0.1",
+    "optics-ts": "^2.4.1",
     "react": "^18",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18",
     "react-player": "^2.13.0",
     "rss-parser": "^3.13.0"
