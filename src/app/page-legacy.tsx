@@ -10,8 +10,6 @@ import { stages, minutes } from "@lib/util";
 import usePodcast from "@lib/usePodcast";
 import { useKeypress } from "@lib/useKeypress";
 
-import usePomodoro from "@lib/usePomodoro";
-
 export interface configUpdates {
   [key: string]: string | number;
 }
@@ -70,7 +68,7 @@ export default function Home() {
 
   const [config, setConfig] = useState({
     focusVideo: "https://www.youtube.com/watch?v=yIQd2Ya0Ziw&ab_channel=Calm",
-    breakChime: "",
+    breakChime: "https://www.youtube.com/watch?v=v2XBFbbq6Dk&ab_channel=SoundVideoEffect",
     breakVideo:
       "https://www.youtube.com/watch?v=MZhivjxcF-M&ab_channel=LofiEveryday",
     refreshVideo:
@@ -246,12 +244,9 @@ export default function Home() {
         />
       </div>
       <div className="bg-slate-500 h-40 flex">
-        <div className="bg-slate-400 flex-grow flex flex-row items-end">
+        <div className="bg-slate-400 flex-grow flex items-end">
           <div className="flex-grow"></div>
-          <div className="w-max px-2 flex flex-col items-center h-full justify-end">
-            <div className="flex-grow cursor-pointer">
-              test
-            </div>
+          <div className="w-max px-2 flex flex-col items-center">
             <div
               className="cursor-pointer text-amber-700 font-bold hover:text-amber-600 transition-colors"
               onClick={() => setshowConfigModal(true)}
