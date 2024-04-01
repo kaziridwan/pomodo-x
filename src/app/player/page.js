@@ -10,6 +10,15 @@ import MediaPlayer from '@components/MediaPlayer'
 // by Daishi Kato https://twitter.com/dai_shi/status/1548456520031305728
 // from a google search on Jotai Recursive
 
+/**
+ * https://www.youtube.com/watch?v=Ao2lNd7jCb8
+ * https://www.youtube.com/watch?v=uJzYt_z6OsY
+ * https://www.youtube.com/watch?v=O0cs8aIXgkc
+ * https://www.youtube.com/watch?v=vMZNAZdw650
+ *  
+ * @returns 
+ */
+
 const Player = () => {
   const [playerState] = useAtom(playerAtom)
 
