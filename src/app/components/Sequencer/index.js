@@ -143,12 +143,14 @@ const AutogrowInput = ({wrapperStyles= '', className = '', value, size = 1, ...p
     <span className={`[visibility:hidden] [grid-area:1/1/2/2] ${className}`}>{value}</span>
   </div>
 )
+AutogrowInput.displayName = "AutogrowInput";
 
 const Field = ({value, ...props}) => {
   return (
     <AutogrowInput className=" text-black " type={props.type ?? "text"} value={value} {...props}/>
   )
 }
+Field.displayName = "Field";
 
 const Track = memo(({ node, layer, position }) => {
   const [,updateTrackValue] = useAtom(updateTrackAtom)
@@ -175,6 +177,7 @@ const Track = memo(({ node, layer, position }) => {
     </div>
   );
 });
+Track.displayName = "Track";
 
 const Tracks = ({nodes, layer = 0, position=[]}) => {
   return (
@@ -187,6 +190,7 @@ const Tracks = ({nodes, layer = 0, position=[]}) => {
     </div>
   )
 }
+Tracks.displayName = "Tracks";
 
 
 const NewTrack = ({ position }) => {
