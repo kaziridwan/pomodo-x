@@ -1,7 +1,4 @@
 "use client"
-import {useAtom} from 'jotai';
-import { playerAtom } from "@components/Controls"
-
 import Sequencer from '@/app/components/Sequencer'
 import Controls from '@components/Controls'
 import MediaPlayer from '@components/MediaPlayer'
@@ -20,8 +17,6 @@ import MediaPlayer from '@components/MediaPlayer'
  */
 
 const Player = () => {
-  const [playerState] = useAtom(playerAtom)
-
   return(
     <div className="w-full bg-white min-h-screen flex flex-col gap-4 p-4">
       {/* contents */}

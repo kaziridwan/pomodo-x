@@ -74,6 +74,57 @@ export const updateTrackAtom = atom(
   }
 )
 
+const isPositionChain = (subjectPosition, referencePosition) => (
+  subjectPosition.length <= referencePosition.length &&
+  JSON.stringify(subjectPosition) === JSON.stringify(referencePosition.slice(0, subjectPosition.length))
+)
+
+const inSameLevel = (positionA, positionB) => positionA.length === positionB.length
+
+const positionMatch = (positionA, positionB) => JSON.stringify(positionA.length) === JSON.stringify(positionB.length)
+
+const deleteTrack = (position = [0], tracks = []) => {
+  console.log('loggr position is', position)
+  return tracks.reduce((acc, track) => {
+    if(isPositionChain(track.value.position, position)){
+      if(inSameLevel(track.value.position, position)) {
+        if(positionMatch(track.value.position, position)) {
+          return acc
+        } else {
+          return [
+            ...acc,
+            track
+          ]
+        }
+      } else {
+        return [
+          ...acc,
+          {
+            ...track,
+            childNodes: deleteTrack(position, track.childNodes)
+          }
+        ]
+      }
+    } else {
+      return [
+        ...acc,
+        track
+      ]
+    }
+  },[])
+}
+
+export const deleteTrackAtom = atom(
+  null,
+  (get, set, position) => {
+    const sequencer = get(sequencerAtom)
+    const updatedSequencer = deleteTrack(position, [...sequencer])
+    set(sequencerAtom, updatedSequencer)
+    set(recalculatePositionAtom)
+    set(setlinearTrackMapAtom)
+  }
+)
+
 export const getTrackAtPosition = (position = [0,0,1], sequence = []) => {
   if(position.length === 0) {
     return sequence;
@@ -101,6 +152,37 @@ const updateValuesGlobally = (sequencer, updates) => {
         value: {
           ...childTrack.value,
           ...updates
+        },
+        childNodes: []
+      }
+    }
+  })
+} 
+
+export const recalculatePositionAtom = atom(
+  null,
+  (get, set) => {
+    const sequencer = get(sequencerAtom);
+    const updatedSequencer = recalculatePosition(sequencer)
+    set(sequencerAtom, updatedSequencer)
+  }
+)
+
+const recalculatePosition = (sequencer, parentPosition = []) => {
+  return sequencer.map((childTrack, index) => {
+    if(childTrack.childNodes.length > 0) {
+      return {
+        value: {
+          ...childTrack.value,
+          position: [...parentPosition, index]
+        },
+        childNodes: updateValuesGlobally(childTrack.childNodes, [...parentPosition, index])
+      }
+    } else {
+      return {
+        value: {
+          ...childTrack.value,
+          position: [...parentPosition, index]
         },
         childNodes: []
       }
@@ -152,7 +234,7 @@ const Field = ({value, ...props}) => {
 }
 Field.displayName = "Field";
 
-const Track = memo(({ node, layer, position }) => {
+const Track = ({ node, layer, position }) => {
   const [,updateTrackValue] = useAtom(updateTrackAtom)
 
   const updateTracks = (positionValue, updates) => {
@@ -161,22 +243,22 @@ const Track = memo(({ node, layer, position }) => {
 
   return (
     <div className={`${getBgColor(layer)} p-4 rounded-tl-2xl `}>
-      <Field value={node.value?.title} onChange={(e) => { updateTracks(position, { title: e.target.value }) }}/>
-      <Field value={node.value?.duration} onChange={(e) => { updateTracks(position, { duration: e.target.value !== '' ? parseInt(e.target.value, 10) : 1 }) }}/>
-      <span>x</span>
-      <span>{node.value.played}</span>
-      <span>/</span>
-      <Field value={node.value.repeat} onChange={(e) => { updateTracks(position, { repeat: e.target.value !== '' ? parseInt(e.target.value, 10) : 1 }) }}/>
-      <br/>
-      <div>
+      <div className=" flex flex-row gap-1 ">
+        <Field value={node.value?.title} onChange={(e) => { updateTracks(position, { title: e.target.value }) }}/>
+        <Field value={node.value?.duration} onChange={(e) => { updateTracks(position, { duration: e.target.value !== '' ? parseInt(e.target.value, 10) : 1 }) }}  className="text-right" />
+        <span>x</span>
+        <span>{node.value.played}</span>
+        <span>/</span>
+        <Field value={node.value.repeat} onChange={(e) => { updateTracks(position, { repeat: e.target.value !== '' ? parseInt(e.target.value, 10) : 1 }) }}/>
+      </div>
+      <div className=" mb-4 ">
         <Field value={node.value?.url} onChange={(e) => { updateTracks(position, { url: e.target.value }) }}/>
       </div>
-
       <Tracks nodes={node.childNodes} layer={layer+1} position={position} />
 
     </div>
   );
-});
+};
 Track.displayName = "Track";
 
 const Tracks = ({nodes, layer = 0, position=[]}) => {
@@ -195,13 +277,25 @@ Tracks.displayName = "Tracks";
 
 const NewTrack = ({ position }) => {
   const [,addNewTrack] = useAtom(addNewTrackAtom);
+  const [,deleteTrackAction] = useAtom(deleteTrackAtom);
+
+  const deleteTrack = () => {
+    deleteTrackAction(position);
+  }
   return (
-    <div className="flex flex-col justify-center">
+    <div className="flex flex-col justify-center gap-2">
       <div className=" bg-orange-700 rounded-lg text-white w-max px-2 text-lg cursor-pointer "
           onClick={() => addNewTrack(position)}
       >
         +
       </div>
+      { position.length > 0 &&
+        <div className=" bg-gray-700 opacity-50 rounded-full text-white w-max px-1 py-2 text-xs cursor-pointer "
+            onClick={deleteTrack}
+        >
+          🗑
+        </div>
+      }
     </div>
   );
 };
