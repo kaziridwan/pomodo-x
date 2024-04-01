@@ -69,15 +69,17 @@ export const checkStageJumpAtom = atom(
   null,
   (get, set) => {
     const player = get(playerAtom)
-    set(setlinearTrackMapAtom); // need to figure this out
-    const trackMap = get(linearTrackMapAtom);
-    const currentTrack = trackMap[player.currentTrackIndex];
-    const totalPlayTimeInMs = player.timeEllapsed + (Date.now() - player.started)
-    const playTimeMinutes = toMinutes(totalPlayTimeInMs);
-    
-    // console.log('loggr checking for stage jump', playTimeMinutes, currentTrack, trackMap, player.currentTrackIndex)
-    if(playTimeMinutes > currentTrack.value.duration) {
-      set(playNextActionAtom)
+    if(player.playback === "playing") {
+      set(setlinearTrackMapAtom); // need to figure this out
+      const trackMap = get(linearTrackMapAtom);
+      const currentTrack = trackMap[player.currentTrackIndex];
+      const totalPlayTimeInMs = player.timeEllapsed + (Date.now() - player.started)
+      const playTimeMinutes = toMinutes(totalPlayTimeInMs);
+      
+      // console.log('loggr checking for stage jump', playTimeMinutes, currentTrack, trackMap, player.currentTrackIndex)
+      if(playTimeMinutes > currentTrack.value.duration) {
+        set(playNextActionAtom)
+      }
     }
   }
 )
