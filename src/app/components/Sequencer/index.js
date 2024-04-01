@@ -70,6 +70,7 @@ export const updateTrackAtom = atom(
     const sequencer = get(sequencerAtom)
     const updatedValue = updateTrackValue(position, updates, [...sequencer])
     set(sequencerAtom, updatedValue)
+    set(setlinearTrackMapAtom)
   }
 )
 
@@ -81,13 +82,11 @@ export const getTrackAtPosition = (position = [0,0,1], sequence = []) => {
     return sequence[position[0]]
   } else {
     const [parentPosition, ...childPositions] = position;
-    console.log('loggr sequecer', sequence, parentPosition, position)
     return getTrackAtPosition(childPositions, sequence[parentPosition].childNodes)
   }
 }
 
 const updateValuesGlobally = (sequencer, updates) => {
-  console.log('loggr global sequencer is ', sequencer)
   return sequencer.map((childTrack) => {
     if(childTrack.childNodes.length > 0) {
       return {
@@ -113,7 +112,6 @@ export const updateAllValuesAtom = atom(
   null,
   (get, set, updates) => {
     const sequencer = get(sequencerAtom);
-    console.log('loggr sequencer is ', sequencer)
     const updatedSequencer = updateValuesGlobally(sequencer, updates)
     set(sequencerAtom, updatedSequencer)
   }

@@ -23,7 +23,7 @@ const generateLinearTrackmap = (sequence, position = [], map = []) => { // dfs, 
       map.push(...deeperTracks);
     }
   }
-  return map.filter(track => isValidUrl(track.url));
+  return map.filter(track => isValidUrl(track.value.url));
 }
 
 export const setlinearTrackMapAtom = atom(
@@ -79,6 +79,7 @@ export const playNextTrackAtom = atom(
     const trackMap = get(linearTrackMapAtom);
     const sequencer = get(sequencerAtom);
     // update the sequencer
+     console.log('loggr current track ', trackMap[currentTrackIndex], trackMap, currentTrackIndex)
     const updatedSequencerValues = playedIncrementsUpdateChain(trackMap[currentTrackIndex], sequencer)
     
     // update the sequencer
@@ -113,8 +114,12 @@ export const playNextTrackAtom = atom(
       }
     } else {
       // play from beggining
-      set(updateAllValuesAtom, {played: 0})
-      set(playerAtom, (prev) => ({...prev, currentTrackIndex: 0}))
+      if(!itsNotTheLastTrack(currentTrackIndex, trackMap) && trackMap[currentTrackIndex].value.played < trackMap[currentTrackIndex].value.repeat) {
+
+      } else {
+        set(updateAllValuesAtom, {played: 0})
+        set(playerAtom, (prev) => ({...prev, currentTrackIndex: 0}))
+      }
     }
     // that can be figured out from the play counts
     // set(playerAtom, (prev)=>({...prev, nextTrackIndex}))

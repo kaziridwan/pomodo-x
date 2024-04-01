@@ -1,5 +1,5 @@
 "use client"
-import { playNextTrackAtom, linearTrackMapAtom } from '@atoms/linearTrackMap'
+import { playNextTrackAtom, linearTrackMapAtom, setlinearTrackMapAtom } from '@atoms/linearTrackMap'
 import { atom, useAtom } from "jotai";
 import { atomWithStorage } from 'jotai/utils';
 
@@ -12,7 +12,9 @@ export const playerAtom = atomWithStorage('player', {
 export const playerPlayActionAtom = atom(
   null,
   (get, set) => {
+    set(setlinearTrackMapAtom);
     const linearTrackMap = get(linearTrackMapAtom);
+    console.log('loggr playing with lineartmp', linearTrackMap)
     set(playerAtom, (prev) => ({...prev, playback: 'playing', url: linearTrackMap[prev.currentTrackIndex].value.url}))
   }
 )
