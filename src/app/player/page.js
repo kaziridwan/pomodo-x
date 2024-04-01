@@ -1,6 +1,8 @@
 "use client"
+import {useAtom} from 'jotai';
+import { playerAtom } from "@components/Controls"
 
-import Sequencer, {rootNodes} from '@/app/components/Sequencer'
+import Sequencer from '@/app/components/Sequencer'
 import Controls from '@components/Controls'
 import MediaPlayer from '@components/MediaPlayer'
 
@@ -9,6 +11,7 @@ import MediaPlayer from '@components/MediaPlayer'
 // from a google search on Jotai Recursive
 
 const Player = () => {
+  const [playerState] = useAtom(playerAtom)
 
   return(
     <div className="w-full bg-white min-h-screen flex flex-col gap-4 p-4">

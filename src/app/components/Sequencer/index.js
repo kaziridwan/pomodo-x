@@ -1,10 +1,12 @@
 "use client"
 // "global localStorage"
 import { memo } from "react";
-import { useAtom } from "jotai";
+import { atom, useAtom } from "jotai";
 import { nanoid } from 'nanoid'
 
 import { atomWithStorage } from 'jotai/utils';
+
+import { setlinearTrackMapAtom } from "@/app/atoms/linearTrackMap";
 
 const BASE_NODE = {
   value: { 
@@ -19,7 +21,7 @@ const BASE_NODE = {
   childNodes: [],
 }
 
-const sequencerAtom = atomWithStorage('sequencer', []);
+export const sequencerAtom = atomWithStorage('sequencer', []);
 
 const addTrack = (position = [], tracks = [], coordinates) => {
   if(position.length === 0 ) {
@@ -45,6 +47,7 @@ const addNewTrackAtom = atom(
     const sequencer = get(sequencerAtom);
     const updatedValue = addTrack(position, [...sequencer], position)
     set(sequencerAtom, updatedValue)
+    set(setlinearTrackMapAtom)
   }
 )
 
@@ -65,24 +68,56 @@ export const updateTrackAtom = atom(
   null,
   (get, set, {position, updates}) => {
     const sequencer = get(sequencerAtom)
-    const updatedValue = updateTrackValue(position, updates, [...rootNodesAtom])
-    set(sequencer, updatedValue)
+    const updatedValue = updateTrackValue(position, updates, [...sequencer])
+    set(sequencerAtom, updatedValue)
   }
 )
 
-export const getTrackAtPosition = (position = [0, 1], sequence) => {
+export const getTrackAtPosition = (position = [0,0,1], sequence = []) => {
+  if(position.length === 0) {
+    return sequence;
+  }
   if(position.length === 1) {
     return sequence[position[0]]
   } else {
-    return position.reduce((_acc, curr, index) => { // dfs
-      if (index === 0) {
-        return sequence[curr]
-      } else {
-        return sequence.childNodes[curr];
-      }
-    }, sequence)
+    const [parentPosition, ...childPositions] = position;
+    console.log('loggr sequecer', sequence, parentPosition, position)
+    return getTrackAtPosition(childPositions, sequence[parentPosition].childNodes)
   }
 }
+
+const updateValuesGlobally = (sequencer, updates) => {
+  console.log('loggr global sequencer is ', sequencer)
+  return sequencer.map((childTrack) => {
+    if(childTrack.childNodes.length > 0) {
+      return {
+        value: {
+          ...childTrack.value,
+          ...updates
+        },
+        childNodes: updateValuesGlobally(childTrack.childNodes, updates)
+      }
+    } else {
+      return {
+        value: {
+          ...childTrack.value,
+          ...updates
+        },
+        childNodes: []
+      }
+    }
+  })
+} 
+
+export const updateAllValuesAtom = atom(
+  null,
+  (get, set, updates) => {
+    const sequencer = get(sequencerAtom);
+    console.log('loggr sequencer is ', sequencer)
+    const updatedSequencer = updateValuesGlobally(sequencer, updates)
+    set(sequencerAtom, updatedSequencer)
+  }
+)
 
 const getBgColor = (layerNumber) => {
   const bgColorsMap = [

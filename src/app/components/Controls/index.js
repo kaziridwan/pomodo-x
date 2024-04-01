@@ -1,6 +1,7 @@
 "use client"
-import { sequencerAtom } from '@components/Sequencer'
-import { linearTrackMapAtom } from '@atoms/linearTrackMap'
+import { playNextTrackAtom, linearTrackMapAtom } from '@atoms/linearTrackMap'
+import { atom, useAtom } from "jotai";
+import { atomWithStorage } from 'jotai/utils';
 
 export const playerAtom = atomWithStorage('player', {
   url: '',
@@ -8,46 +9,51 @@ export const playerAtom = atomWithStorage('player', {
   playback: 'paused', // playing | paused
 })
 
-const playerPlayActionAtom = atom(
+export const playerPlayActionAtom = atom(
   null,
   (get, set) => {
-    set(playerAtom, (prev) => ({...prev, playback: 'playing'}))
+    const linearTrackMap = get(linearTrackMapAtom);
+    set(playerAtom, (prev) => ({...prev, playback: 'playing', url: linearTrackMap[prev.currentTrackIndex].value.url}))
   }
 )
 
-const playerPauseActionAtom = atom(
+export const playerPauseActionAtom = atom(
   null,
   (_get, set) => {
     set(playerAtom, (prev) => ({...prev, playback: 'paused'}))
   }
 )
 
-const playerPlaybackToggleActionAtom = atom(
+const playPauseActionAtom = atom(
   null,
   (get, set) => {
-    const player = get(playerAtom);
-    if(player.playback === "paused") {
-      set(playerAtom, (prev) => ({...prev, playback: 'playing'}))
+    const {playback} = get(playerAtom);
+    if(playback === 'playing') {
+      set(playerPauseActionAtom)
     } else {
-      set(playerAtom, (prev) => ({...prev, playback: 'paused'}))
+      set(playerPlayActionAtom)
     }
   }
 )
 
-// const playNextActionAtom = atom(
-//   null,
-//   (get, set, updates) => {
-//     set(incrementTrackPlayedAtom);
-//   }
-// )
+
+const playNextActionAtom = atom(
+  null,
+  (get, set, updates) => {
+    const { currentTrackIndex } = get(playerAtom);
+    set(playNextTrackAtom, currentTrackIndex);
+  }
+)
 
 
 const Controls = () => {
+  const [, playPause] = useAtom(playPauseActionAtom)
+  const [, playNext] = useAtom(playNextActionAtom)
   return (
     <div>
       <div className=" cursor-pointer " onClick={playPause}>play</div>
       <div>-</div>
-      <div className=" cursor-pointer " onClick={skipToNext}>skip next</div>
+      <div className=" cursor-pointer " onClick={playPause}>skip next</div>
       <div>-</div>
       <div className=" cursor-pointer " onClick={playNext}>next</div>
     </div>

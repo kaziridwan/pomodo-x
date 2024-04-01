@@ -1,13 +1,15 @@
 "use client"
 // import ReactPlayer from "react-player";
 import dynamic from 'next/dynamic'
-
-import usePlayer from "@hooks/usePlayer";
+import {useAtom} from 'jotai'
+import { playerAtom } from "../Controls";
 
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
+export const isValidUrl = (url) => (url.split('/').length > 3)
+
 const MediaPlayer = ({checkforStageJump}) => {
-  const { playerState } = usePlayer();
+  const [playerState] = useAtom(playerAtom)
 
   return (
     <div>
@@ -15,7 +17,7 @@ const MediaPlayer = ({checkforStageJump}) => {
       <ReactPlayer
           key={`${playerState.url}-${playerState.playback}`}
           url={playerState.url}
-          playing={playerState.playback === 'playing'}
+          playing={playerState.playback === 'playing' && isValidUrl(playerState.url)}
           // progressInterval={5000}
           // onProgress={checkforStageJump}
           loop
