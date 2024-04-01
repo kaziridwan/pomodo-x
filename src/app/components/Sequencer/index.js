@@ -6,10 +6,6 @@ import { nanoid } from 'nanoid'
 
 import { atomWithStorage } from 'jotai/utils';
 
-// based on https://codesandbox.io/p/sandbox/recursive-nodes-demo-with-jotai-ff7y1u?file=%2Fsrc%2FApp.js%3A17%2C1
-// by Daishi Kato https://twitter.com/dai_shi/status/1548456520031305728
-// from a google search on Jotai Recursive
-
 const BASE_NODE = {
   value: { 
     title: 'New Track',
@@ -23,8 +19,70 @@ const BASE_NODE = {
   childNodes: [],
 }
 
-export const rootNodes = atomWithStorage('rootNodes', []);
+const sequencerAtom = atomWithStorage('sequencer', []);
 
+const addTrack = (position = [], tracks = [], coordinates) => {
+  if(position.length === 0 ) {
+    return [...tracks, {
+      ...BASE_NODE,
+      value: {
+        ...BASE_NODE.value,
+        title: `track-${coordinates.length > 0 ? `${coordinates},` : ''}${tracks.length}`,
+        position: coordinates.length === 0 ? [tracks.length] :  [...coordinates, tracks.length], // we need to recalculate position on drag/ drop/ delete
+        identifier: nanoid(),
+      }
+    }]
+  } else {
+    const [firstCoordinate, ...remainingCoordinates] = position;
+    tracks[firstCoordinate].childNodes = addTrack(remainingCoordinates, tracks[firstCoordinate].childNodes, coordinates);
+    return tracks;
+  }
+}
+
+const addNewTrackAtom = atom(
+  null,
+  (get, set, position) => {
+    const sequencer = get(sequencerAtom);
+    const updatedValue = addTrack(position, [...sequencer], position)
+    set(sequencerAtom, updatedValue)
+  }
+)
+
+const updateTrackValue = (position = [0], updates, tracks = []) => {
+  const [firstCoordinate, ...remainingCoordinates] = position;
+  if(position.length === 1) {
+    tracks[firstCoordinate].value = {
+      ...tracks[firstCoordinate].value,
+      ...updates
+    };
+  } else {
+    tracks[firstCoordinate].childNodes = updateTrackValue(remainingCoordinates, updates, tracks[firstCoordinate].childNodes); 
+  }
+  return tracks;
+}
+
+export const updateTrackAtom = atom(
+  null,
+  (get, set, {position, updates}) => {
+    const sequencer = get(sequencerAtom)
+    const updatedValue = updateTrackValue(position, updates, [...rootNodesAtom])
+    set(sequencer, updatedValue)
+  }
+)
+
+export const getTrackAtPosition = (position = [0, 1], sequence) => {
+  if(position.length === 1) {
+    return sequence[position[0]]
+  } else {
+    return position.reduce((_acc, curr, index) => { // dfs
+      if (index === 0) {
+        return sequence[curr]
+      } else {
+        return sequence.childNodes[curr];
+      }
+    }, sequence)
+  }
+}
 
 const getBgColor = (layerNumber) => {
   const bgColorsMap = [
@@ -59,7 +117,12 @@ const Field = ({value, ...props}) => {
   )
 }
 
-const Track = memo(({ node, layer, position, addTracks, updateTracks }) => {
+const Track = memo(({ node, layer, position }) => {
+  const [,updateTrackValue] = useAtom(updateTrackAtom)
+
+  const updateTracks = (positionValue, updates) => {
+    updateTrackValue({position: positionValue, updates})
+  }
 
   return (
     <div className={`${getBgColor(layer)} p-4 rounded-tl-2xl `}>
@@ -74,33 +137,31 @@ const Track = memo(({ node, layer, position, addTracks, updateTracks }) => {
         <Field value={node.value?.url} onChange={(e) => { updateTracks(position, { url: e.target.value }) }}/>
       </div>
 
-      <Tracks nodes={node.childNodes} layer={layer+1} position={position} addTracks={addTracks} updateTracks={updateTracks} />
+      <Tracks nodes={node.childNodes} layer={layer+1} position={position} />
 
     </div>
   );
 });
 
-const Tracks = ({nodes, layer = 0, addTracks, updateTracks, position=[]}) => {
+const Tracks = ({nodes, layer = 0, position=[]}) => {
   return (
     <div className="flex flex-row gap-1">
       {nodes?.length > 0 && nodes.map((t, index) => (
-        <Track node={t} layer={layer} key={`${[...position,index]}`} position={[...position, index]} addTracks={addTracks} updateTracks={updateTracks}/>
+        <Track node={t} layer={layer} key={`${[...position,index]}`} position={[...position, index]}/>
       ))}
       <div className={`${nodes.length > 0 ? 'min-w-[.5rem]' : ''}`}></div>
-      <NewTrack addTracks={addTracks} position={position}/>
+      <NewTrack position={position}/>
     </div>
   )
 }
 
 
-const NewTrack = ({ addTracks, position }) => {
-  const add = () => {
-    addTracks(position);
-  };
+const NewTrack = ({ position }) => {
+  const [,addNewTrack] = useAtom(addNewTrackAtom);
   return (
     <div className="flex flex-col justify-center">
       <div className=" bg-orange-700 rounded-lg text-white w-max px-2 text-lg cursor-pointer "
-          onClick={add}
+          onClick={() => addNewTrack(position)}
       >
         +
       </div>
@@ -110,52 +171,10 @@ const NewTrack = ({ addTracks, position }) => {
 
 const Sequencer = () => {
 
-  const [rootNodesAtom, setRootNodesAtom] = useAtom(rootNodes)
-
-  const updateTrackValue = (position = [0], updates, tracks = []) => {
-    const [firstCoordinate, ...remainingCoordinates] = position;
-    if(position.length === 1) {
-      tracks[firstCoordinate].value = {
-        ...tracks[firstCoordinate].value,
-        ...updates
-      };
-    } else {
-      tracks[firstCoordinate].childNodes = updateTrackValue(remainingCoordinates, updates, tracks[firstCoordinate].childNodes); 
-    }
-    return tracks;
-  }
-
-  const updateTracks = (position = [0], updates) => {
-    const updatedValue = updateTrackValue(position, updates, [...rootNodesAtom])
-    setRootNodesAtom(updatedValue);
-  }
-
-  const addTrack = (position = [], tracks = [], coordinates) => {
-    if(position.length === 0 ) {
-      return [...tracks, {
-        ...BASE_NODE,
-        value: {
-          ...BASE_NODE.value,
-          title: `track-${coordinates.length > 0 ? `${coordinates},` : ''}${tracks.length}`,
-          position: coordinates.length === 0 ? [tracks.length] :  [...coordinates, tracks.length], // we need to recalculate position on drag/ drop/ delete
-          identifier: nanoid(),
-        }
-      }]
-    } else {
-      const [firstCoordinate, ...remainingCoordinates] = position;
-      tracks[firstCoordinate].childNodes = addTrack(remainingCoordinates, tracks[firstCoordinate].childNodes, coordinates);
-      return tracks;
-    }
-  }
-
-  const addTracks = (position = []) => {
-    const updatedValue = addTrack(position, [...rootNodesAtom], position)
-    setRootNodesAtom(updatedValue);
-  }
-
+  const [sequencer] = useAtom(sequencerAtom)
 
   return(
-    <Tracks nodes={rootNodesAtom} updateTracks={updateTracks} addTracks={addTracks}/>
+    <Tracks nodes={sequencer}/>
   )
 }
 

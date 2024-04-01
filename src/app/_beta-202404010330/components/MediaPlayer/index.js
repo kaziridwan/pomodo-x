@@ -2,12 +2,12 @@
 // import ReactPlayer from "react-player";
 import dynamic from 'next/dynamic'
 
-import usePlayer from "@hooks/usePlayer";
+import usePomodoroPlayer from "@hooks/usePomodoroPlayer";
 
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
 const MediaPlayer = ({checkforStageJump}) => {
-  const { playerState } = usePlayer();
+  const { playerState } = usePomodoroPlayer();
 
   return (
     <div>
