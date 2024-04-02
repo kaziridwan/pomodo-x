@@ -157,7 +157,29 @@ const updateValuesGlobally = (sequencer, updates) => {
       }
     }
   })
-} 
+}
+
+const resetLoopsGlobally = (sequencer) => {
+  return sequencer.map((childTrack) => {
+    if(childTrack.childNodes.length > 0) {
+      return {
+        value: {
+          ...childTrack.value,
+          played: childTrack.value.played >= childTrack.value.repeat ? 0 : childTrack.value.played
+        },
+        childNodes: resetLoopsGlobally(childTrack.childNodes, updates)
+      }
+    } else {
+      return {
+        value: {
+          ...childTrack.value,
+          played: childTrack.value.played >= childTrack.value.repeat ? 0 : childTrack.value.played
+        },
+        childNodes: []
+      }
+    }
+  })
+}
 
 export const recalculatePositionAtom = atom(
   null,
@@ -195,6 +217,15 @@ export const updateAllValuesAtom = atom(
   (get, set, updates) => {
     const sequencer = get(sequencerAtom);
     const updatedSequencer = updateValuesGlobally(sequencer, updates)
+    set(sequencerAtom, updatedSequencer)
+  }
+)
+
+export const resetAllFinishedLoopsAtom = atom(
+  null,
+  (get, set) => {
+    const sequencer = get(sequencerAtom);
+    const updatedSequencer = resetLoopsGlobally(sequencer)
     set(sequencerAtom, updatedSequencer)
   }
 )
