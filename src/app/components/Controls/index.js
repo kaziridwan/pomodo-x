@@ -7,7 +7,8 @@ import { toMinutes } from "@/app/lib/util";
 export const playerAtom = atomWithStorage('player', {
   url: '',
   currentTrackIndex: 0,
-  playback: 'paused', // playing | paused
+  currentTrackPosition: [0],
+  playback: 'paused', // playing | paused | finished
   timeEllapsed: 0, // in ms
   started: 0, // in ms
 })

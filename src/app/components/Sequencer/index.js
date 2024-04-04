@@ -1,12 +1,12 @@
 "use client"
 // "global localStorage"
-import { memo } from "react";
 import { atom, useAtom } from "jotai";
 import { nanoid } from 'nanoid'
 
 import { atomWithStorage } from 'jotai/utils';
 
 import { setlinearTrackMapAtom } from "@/app/atoms/linearTrackMap";
+import defaultSequence from './defaultSequence.json';
 
 const BASE_NODE = {
   value: { 
@@ -21,7 +21,7 @@ const BASE_NODE = {
   childNodes: [],
 }
 
-export const sequencerAtom = atomWithStorage('sequencer', []);
+export const sequencerAtom = atomWithStorage('sequencer', defaultSequence);
 
 const addTrack = (position = [], tracks = [], coordinates) => {
   if(position.length === 0 ) {
@@ -167,7 +167,7 @@ const resetLoopsGlobally = (sequencer) => {
           ...childTrack.value,
           played: childTrack.value.played >= childTrack.value.repeat ? 0 : childTrack.value.played
         },
-        childNodes: resetLoopsGlobally(childTrack.childNodes, updates)
+        childNodes: resetLoopsGlobally(childTrack.childNodes)
       }
     } else {
       return {
@@ -227,6 +227,38 @@ export const resetAllFinishedLoopsAtom = atom(
     const sequencer = get(sequencerAtom);
     const updatedSequencer = resetLoopsGlobally(sequencer)
     set(sequencerAtom, updatedSequencer)
+  }
+)
+
+export const resetLoopsForTrack = atom(
+  null,
+  (get, set, position) => {
+    const positionChains = position.map((_val, index) => (position.slice(0, position.length - index)))
+
+    for (const positionItem of positionChains) {
+      set(updateTrackAtom, {
+        position: positionItem,
+        updates: {
+          played: 0
+        }
+      })
+    }
+  }
+)
+
+export const resetLoopsInAtom = atom(
+  null,
+  (get, set, parentTracks) => {
+    console.log('loggr reseting loops in ', parentTracks)
+    for (const parentTrack of parentTracks) {
+      if(parentTrack.value.played >= parentTrack.value.repeat) {
+        for(const track of parentTrack.childNodes) {
+          const position = track.value.position;
+          set(resetLoopsForTrack, position)
+        }
+      }
+    }
+
   }
 )
 

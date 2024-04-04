@@ -1,15 +1,13 @@
 "use client"
 
 import { atom } from 'jotai'
-import { sequencerAtom, getTrackAtPosition, updateTrackAtom, updateAllValuesAtom, resetAllFinishedLoopsAtom } from '@components/Sequencer'
+import { sequencerAtom, getTrackAtPosition, updateTrackAtom, resetLoopsInAtom, updateAllValuesAtom } from '@components/Sequencer'
 import { playerAtom, playerPlayActionAtom, playerPauseActionAtom } from "../components/Controls"
 import { atomWithStorage } from 'jotai/utils';
 
-import { isValidUrl } from "../components/MediaPlayer";
-
 export const linearTrackMapAtom = atomWithStorage('linearTrackMap', []);
 // i am using recursion instead of while rigorously
-const generateLinearTrackmap = (sequence, position = [], map = []) => { // dfs, tree-graph
+const generateLinearTrackmap = (sequence, position = [], map = [] ) => { // dfs, tree-graph
   if(!sequence.length || sequence.length == 0) {
     return []
   }
@@ -36,117 +34,89 @@ export const setlinearTrackMapAtom = atom(
   }
 );
 /**
-     * if last track
-     *  loopfrom beginning
-     * else
-     *  if self loop remaining
-     *    loop self
-     *  else
-     *    play next
-     * 
-     * // another approach
-     * 
-     * take the context of the track, and move to its parents slowly
-     * if (self) loop
-     *  loop (self) -> play itself if it has no childtrack, or play first child track
-     * or
-     *  move one context up 
-     *
-     * // improvisation
-     * if loop remaining
-     *  go ahead and play
-     * else
-     *  move context up
-     * 
-     * // improvisation from other direction
-     * if loop ended
-     *  move context up and play next
-     * else
-     *  play
-     * 
-     * // improvisation from other direction
-     * track
-     * if loop ended
-     *  get parent context
-     *  if last child
-     *    recurse with parent context
-     *  else
-     *    play next child
-     * else
-     *  if childtrack
-     *    play first child track of child of child ...recursed
-     *  else
-     *    play self
-     * 
-     * if should not loop
-     *  if last child
-     *    if theres a parent track
-     *      recurse with parent track
-     *    if no
-     *      play from start of parent
-     *  else
-     *    play next child
-     * else
-     *  play self
-     */
-const findNextPlayableTrack = (track, sequencer, trackMap) => {
-  console.log("loggr digging through ", track)
+ * 
+ * if should not loop
+ *  if last child
+ *    if theres a parent track
+ *      recurse with parent track
+ *    if no
+ *      play from start of parent
+ *  else
+ *    play next child
+ * else
+ *  play self
+ */
+
+const findNextPlayableTrack = (track, sequencer, resetLoopsIn = []) => {
   const parentTrack = track.value.position.length === 1 ? null : getTrackAtPosition(track.value.position.slice(0, track.value.position.length - 1), sequencer);
-  const parentContext = parentTrack ? parentTrack.childNodes : sequencer;
-  if(itShouldNotLoop(track)){
-    console.log("loggr digging through parent ", parentTrack, parentContext, itShouldNotLoop(track),itsLastChild(track, parentContext) )
-    if(itsLastChild(track, parentContext)) {
-      if(parentTrack){ // its a root level track
-        return findNextPlayableTrack(parentTrack, sequencer, trackMap);
+  const tracksContext = parentTrack ? parentTrack.childNodes : sequencer;
+  const isLoop = track.childNodes.length > 0;
+  if(itsDonePlaying(track)){
+    if(itsLastChild(track, tracksContext)) { // either it can replay (parent) context or [[[move next]]]
+      if(parentTrack){ // its not a root level track
+        return findNextPlayableTrack(parentTrack, sequencer, [...resetLoopsIn, parentTrack]);
       } else {
-        console.log('loggr')
-        return getPlayableTrack(parentContext[0], true); // restart the loop
+        return { // restart the loop
+          ...getPlayableTrack(tracksContext[0]),
+          resetLoopsIn,
+          resetAllLoops: true
+        };
       }
     } else { // play next
+      const trackIndex = tracksContext.findIndex(t => t.value.identifier === track.value.identifier);
+      const nextTrackIndex = trackIndex < tracksContext.length - 1 ? trackIndex + 1 : 0; 
       if(parentTrack) {
-        const trackIndex = trackMap.findIndex(t => t.value.identifier === track.value.identifier);
-        const nextTrackIndex = trackIndex < trackMap.length - 1 ? trackIndex + 1 : 0; 
-        return getPlayableTrack(trackMap[nextTrackIndex])
+        return {
+          ...getPlayableTrack(tracksContext[nextTrackIndex]),
+          resetLoopsIn,
+        }
       } else {
-        const trackIndex = sequencer.findIndex(t => t.value.identifier === track.value.identifier);
-        const nextTrackIndex = trackIndex < sequencer.length - 1 ? trackIndex + 1 : 0;
-        return getPlayableTrack(sequencer[nextTrackIndex], true, true) // partial reset
+        return { // partial reset
+          ...getPlayableTrack(tracksContext[nextTrackIndex]),
+          resetLoopsIn,
+        }
       }
     }
-  } else {
-    if(parentTrack) {
-      return getPlayableTrack(track);
-    } else {
-      const trackIndex = sequencer.findIndex(t => t.value.identifier === track.identifier);
-      const nextTrackIndex = trackIndex < sequencer.length - 1 ? trackIndex + 1 : 0; 
-      return getPlayableTrack(sequencer[nextTrackIndex])
+  } else { // it should loop
+    if(isLoop) { // play it (or its last-gen child)
+      return {
+        ...getPlayableTrack(track),
+        resetLoopsIn,
+      };
+    } else { // if its root level track, just ~~move next~~~ play again
+      const trackIndex = tracksContext.findIndex(t => t.value.identifier === track.value.identifier);
+      // const nextTrackIndex = trackIndex < tracksContext.length - 1 ? trackIndex + 1 : 0; 
+      return {
+        ...getPlayableTrack(track),
+        resetLoopsIn,
+      }
     }
   }
 }
 
-const itsLastChild = (track, parentContext) => {
+const itsLastChild = (track, tracksContext) => {
   // either its last child of its parent, but if its at the sequencer level, if its last child of the sequencer
   // make sure to sanitize the parent context
   // filter(item => isValidUrl(item.value.url))
-  const childIndex = parentContext.findIndex(item => item.value.identifier === track.value.identifier);
-  console.log('loggr child Index ', childIndex)
-  console.log('loggr parent length ', parentContext.length)
-  return childIndex === parentContext.length - 1
+  const childIndex = tracksContext.findIndex(item => item.value.identifier === track.value.identifier);
+  return childIndex === tracksContext.length - 1
 }
 
-const getPlayableTrack = (track, resetPlayedCounts = false, resetFinishedLoops = false) => {
+const getPlayableTrack = (track) => {
   if(track.childNodes.length === 0) {
     return {
       nextTrack: track,
-      resetPlayedCounts
     };
   } else {
-    return getPlayableTrack(track.childNodes[0], resetPlayedCounts, resetFinishedLoops);
+    return getPlayableTrack(track.childNodes[0]);
   }
 }
 
 const playedIncrementsUpdateChain = (track, sequencer) => {
   const positionChains = track.value.position.map((_val, index) => (track.value.position.slice(0, track.value.position.length - index)))
+
+  const increaseTrackPlayed = track => track.value.played < track.value.repeat ? track.value.played + 1 : track.value.played
+
   return positionChains.map((trackPosition, index) => {
     const trackAtCursor = getTrackAtPosition(trackPosition, sequencer);
     if(index === 0) {
@@ -154,7 +124,7 @@ const playedIncrementsUpdateChain = (track, sequencer) => {
         ...trackAtCursor,
         value: {
           ...trackAtCursor.value,
-          played: trackAtCursor.value.played + 1
+          played: increaseTrackPlayed(trackAtCursor),
         }
       }
     } else {
@@ -166,7 +136,7 @@ const playedIncrementsUpdateChain = (track, sequencer) => {
           ...trackAtCursor,
           value: {
             ...trackAtCursor.value,
-            played: trackAtCursor.value.played + 1
+            played: increaseTrackPlayed(trackAtCursor),
           }
         }
       } else {
@@ -176,13 +146,12 @@ const playedIncrementsUpdateChain = (track, sequencer) => {
   })
 }
 
-const itShouldLoop = (track) => (track.value.played < track.value.repeat)
 const itShouldNotLoop = (track) => {
   return (track.value.played >= track.value.repeat - 1) // repeat - 1 because it should stop looping before the last play
 }
-const itsNotTheLastTrack = (trackIndex, trackMap) => (trackIndex < trackMap.length - 1)
-const getTrackIndexForPosition = (position, trackMap) => {
-  return trackMap.findIndex(track => track.position === position)
+
+const itsDonePlaying = (track) => {
+  return (track.value.played >= track.value.repeat - 1 ) // repeat - 1 because it should stop looping before the last play
 }
 
 export const playNextTrackAtom = atom(
@@ -192,8 +161,8 @@ export const playNextTrackAtom = atom(
     const trackMap = get(linearTrackMapAtom);
     const sequencer = get(sequencerAtom);
     // update the sequencer
-    const { nextTrack, resetPlayedCounts, resetFinishedLoops } = findNextPlayableTrack(trackMap[currentTrackIndex], sequencer, trackMap);
-
+    const { nextTrack, resetAllLoops, resetLoopsIn } = findNextPlayableTrack(trackMap[currentTrackIndex], sequencer);
+    
     const updatedSequencerValues = playedIncrementsUpdateChain(trackMap[currentTrackIndex], sequencer)
     // update the sequencer
     // set(sequencerAtom, updatedSequencerState)
@@ -201,6 +170,8 @@ export const playNextTrackAtom = atom(
       set(updateTrackAtom, {position: sequencerTrackUpdate.value.position, updates: {played: sequencerTrackUpdate.value.played}})
     }
     
+    const updatedSequencerWithPlayedCounts = get(sequencerAtom);
+    const updatedTrackMap = get(linearTrackMapAtom);
     // update the player
     // either its 
     /**
@@ -214,16 +185,17 @@ export const playNextTrackAtom = atom(
      * then its trackIndex 
      *  */
     const nextTrackIndex = trackMap.findIndex(t => t.value.identifier === nextTrack.value.identifier)
-    if(resetPlayedCounts) {
-      if(resetFinishedLoops) {
-        set(resetAllFinishedLoopsAtom)
-      } else {
-        set(updateAllValuesAtom, {played: 0})
-      }
-    }
+    
+    
     set(playerAtom, (prev) => ({...prev, currentTrackIndex: nextTrackIndex}));
     // that can be figured out from the play counts
     // set(playerAtom, (prev)=>({...prev, nextTrackIndex}))
     set(playerPlayActionAtom)
+    if(resetAllLoops) {
+      console.log('loggr reset all looops')
+      set(updateAllValuesAtom, {played: 0})
+    } else {
+      // set(resetLoopsInAtom, resetLoopsIn)
+    }
   }
 )
