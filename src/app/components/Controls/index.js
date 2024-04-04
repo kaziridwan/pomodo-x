@@ -3,6 +3,7 @@ import { playNextTrackAtom, linearTrackMapAtom, setlinearTrackMapAtom } from '@a
 import { atom, useAtom } from "jotai";
 import { atomWithStorage } from 'jotai/utils';
 import { toMinutes } from "@/app/lib/util";
+import { useKeypress } from "@/app/lib/useKeypress";
 
 export const playerAtom = atomWithStorage('player', {
   url: '',
@@ -85,18 +86,38 @@ export const checkStageJumpAtom = atom(
   }
 )
 
+export const getCurrentLinearTrackAtom = atom(
+  (get) => {
+    const player = get(playerAtom)
+    const trackMap = get(linearTrackMapAtom);
+    return trackMap[player.currentTrackIndex];
+  }
+)
+
 
 const Controls = () => {
   const [, playPause] = useAtom(playPauseActionAtom)
   const [, playNext] = useAtom(playNextActionAtom)
   const [, skipNext] = useAtom(skipToNextActionAtom)
+
+  useKeypress(() => {
+    playPause();
+  }, ' ', {
+    doublePress: () => {
+      playNext();
+    },
+    tripplePress: () => {
+      skipNext();
+    },
+  }, 300);
+
   return (
     <div>
-      <div className=" cursor-pointer " onClick={playPause}>play</div>
+      <div className=" cursor-pointer " onClick={playPause} title="Alternatively press space">play</div>
       <div>-</div>
-      <div className=" cursor-pointer " onClick={skipNext}>skip next</div>
+      <div className=" cursor-pointer " onClick={playNext} title="Alternatively double-press space">next</div>
       <div>-</div>
-      <div className=" cursor-pointer " onClick={playNext}>next</div>
+      <div className=" cursor-pointer " onClick={skipNext} title="Alternatively tripple-press space">skip next</div>
     </div>
   )
 }
