@@ -41,8 +41,7 @@ export default function Home() {
       if(!showConfigModal) {
         playRefresher();
       }
-  }}, 300
-  );
+  }}, 300);
 
   const [sessionStatus, setSessionStatus] = useState({
     sessionNumber: 0,

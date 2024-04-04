@@ -1,5 +1,6 @@
 export const minutes = (minCount: number) => (minCount*60*1000);
 export const toMinutes = (msCount: number) => (msCount/(60*1000));
+export const toTimeString = (msCount: number) => (`${String(Math.floor(msCount/(60*1000))).padStart(2,'0')}:${String(Math.floor((msCount%(60*1000))/1000)).padStart(2,'0')}`);
 
 interface StageObject {
   [key: string]: {

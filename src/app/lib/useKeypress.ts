@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 export const useKeypress = (callback: () => void, key: string, {doublePress, tripplePress} : {doublePress?: () => void, tripplePress?: () => void }, delay = 1000) => {
   // const [pressCount, setPressCount] = useState(0);
