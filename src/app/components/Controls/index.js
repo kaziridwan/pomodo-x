@@ -48,7 +48,7 @@ export const playNextActionAtom = atom(
   null,
   (get, set) => {
     const { currentTrackIndex } = get(playerAtom);
-    set(playerAtom, (prev) => ({...prev, timeEllapsed: 0}));
+    set(playerAtom, (prev) => ({...prev, timeEllapsed: 0, started: Date.now() }));
     set(playNextTrackAtom, currentTrackIndex);
   }
 )
