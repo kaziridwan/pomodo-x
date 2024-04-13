@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid'
 
 import { atomWithStorage } from 'jotai/utils';
 
-import { setlinearTrackMapAtom } from "@/app/atoms/linearTrackMap";
+import { setlinearTrackMapAtom, playTrackAtom } from "@/app/atoms/linearTrackMap";
 import defaultSequence from './defaultSequence.json';
 
 const BASE_NODE = {
@@ -290,18 +290,23 @@ const AutogrowInput = ({wrapperStyles= '', className = '', value, size = 1, ...p
 )
 AutogrowInput.displayName = "AutogrowInput";
 
-const Field = ({value, ...props}) => {
+const Field = ({value, className, ...props}) => {
   return (
-    <AutogrowInput className=" text-black " type={props.type ?? "text"} value={value} {...props}/>
+    <AutogrowInput className={`text-black ${className ?? ''}`} type={props.type ?? "text"} value={value} {...props}/>
   )
 }
 Field.displayName = "Field";
 
 const Track = ({ node, layer, position }) => {
   const [,updateTrackValue] = useAtom(updateTrackAtom)
+  const [, playTrack] = useAtom(playTrackAtom);
 
   const updateTracks = (positionValue, updates) => {
     updateTrackValue({position: positionValue, updates})
+  }
+
+  const playThisTrack = () => {
+    playTrack(node)
   }
 
   return (
@@ -313,9 +318,11 @@ const Track = ({ node, layer, position }) => {
         <span>{node.value.played}</span>
         <span>/</span>
         <Field value={node.value.repeat} onChange={(e) => { updateTracks(position, { repeat: e.target.value !== '' ? parseInt(e.target.value, 10) : 1 }) }}/>
+        <span>{' '}</span>
+        <span className=" cursor-pointer " onClick={playThisTrack}>▷</span>
       </div>
       <div className=" mb-4 ">
-        <Field value={node.value?.url} onChange={(e) => { updateTracks(position, { url: e.target.value }) }}/>
+        <Field value={node.value?.url} className=" !max-w-xs " onChange={(e) => { updateTracks(position, { url: e.target.value }) }}/>
       </div>
       <Tracks nodes={node.childNodes} layer={layer+1} position={position} />
 

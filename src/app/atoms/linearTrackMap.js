@@ -199,3 +199,16 @@ export const playNextTrackAtom = atom(
     }
   }
 )
+
+export const playTrackAtom = atom(
+  null,
+  (get, set, currentTrack) => {
+    set(playerPauseActionAtom)
+    const {nextTrack: playableTrack} = getPlayableTrack(currentTrack);
+    set(setlinearTrackMapAtom);
+    const trackMap = get(linearTrackMapAtom);
+    const currentTrackIndex = trackMap.findIndex(t => t.value.identifier === playableTrack.value.identifier)
+    set(playerAtom, (prev) => ({...prev, currentTrackIndex, timeEllapsed: 0}));
+    set(playerPlayActionAtom)
+  }
+)
