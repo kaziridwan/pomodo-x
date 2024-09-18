@@ -1,7 +1,7 @@
 "use client"
 
 import Sequencer, {rootNodes} from '@/app/components/Sequencer'
-import Controls from '@components/Controls'
+import Controls from '@/app/components/Controls/index-v1'
 import MediaPlayer from '@components/MediaPlayer'
 
 // based on https://codesandbox.io/p/sandbox/recursive-nodes-demo-with-jotai-ff7y1u?file=%2Fsrc%2FApp.js%3A17%2C1

@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import {useAtom} from 'jotai'
 import { atomWithStorage } from 'jotai/utils';
-import { playerAtom, checkStageJumpAtom, getCurrentLinearTrackAtom } from "../Controls";
+import { playerAtom, checkStageJumpAtom, getCurrentLinearTrackAtom } from "../Controls/index-v1";
 import { toTimeString } from "@/app/lib/util";
 
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });

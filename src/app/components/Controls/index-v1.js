@@ -112,12 +112,12 @@ const Controls = () => {
   }, 300);
 
   return (
-    <div className="flex flex-row-reverse xl:flex-col-reverse p-4 gap-4 xl:h-full">
-      <div className=" bg-white flex h-full xl:h-max w-12 cursor-pointer text-black p-2 rounded-md" onClick={playPause} title="Alternatively press space">play</div>
-      {/* <div>-</div> */}
-      <div className=" bg-white flex h-full xl:h-max w-12 cursor-pointer text-black p-2 rounded-md" onClick={playNext} title="Alternatively double-press space">next</div>
-      {/* <div>-</div> */}
-      <div className=" flex flex-row gap-1 xl:flex-col items-center bg-white h-full xl:h-max w-auto xl:w-12 cursor-pointer text-black p-2 rounded-md" onClick={skipNext} title="Alternatively tripple-press space">skip <span>next</span></div>
+    <div>
+      <div className=" cursor-pointer " onClick={playPause} title="Alternatively press space">play</div>
+      <div>-</div>
+      <div className=" cursor-pointer " onClick={playNext} title="Alternatively double-press space">next</div>
+      <div>-</div>
+      <div className=" cursor-pointer " onClick={skipNext} title="Alternatively tripple-press space">skip next</div>
     </div>
   )
 }

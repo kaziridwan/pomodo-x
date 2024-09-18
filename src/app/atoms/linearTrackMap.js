@@ -2,7 +2,7 @@
 
 import { atom } from 'jotai'
 import { sequencerAtom, getTrackAtPosition, updateTrackAtom, resetLoopsInAtom, updateAllValuesAtom } from '@components/Sequencer'
-import { playerAtom, playerPlayActionAtom, playerPauseActionAtom } from "../components/Controls"
+import { playerAtom, playerPlayActionAtom, playerPauseActionAtom } from "../components/Controls/index-v1"
 import { atomWithStorage } from 'jotai/utils';
 
 export const linearTrackMapAtom = atomWithStorage('linearTrackMap', []);
