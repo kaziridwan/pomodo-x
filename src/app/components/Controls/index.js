@@ -36,6 +36,7 @@ const playPauseActionAtom = atom(
   null,
   (get, set) => {
     const {playback} = get(playerAtom);
+    console.log(' play pause', playback)
     if(playback === 'playing') {
       set(playerPauseActionAtom)
     } else {

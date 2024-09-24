@@ -18,13 +18,12 @@ import MediaPlayer from '@components/MediaPlayer'
 
 const Player = () => {
   return(
-    <div className="w-full min-h-screen bg-white">
-      <div className="max-w-full xl:max-w-[calc(100%-5rem)] bg-slate-200 text-black">
+    <div className="w-full min-h-screen bg-white flex flex-col">
+      <div className="flex flex-col max-w-full min-h-screen xl:max-w-[calc(100%-5rem)] bg-slate-200 text-black">
         <div className="p-5 overflow-scroll">
           <Sequencer/>
-
         </div>
-        <div className="bg-stone-400 p-5 min-h-[20rem] flex justify-center items-center">
+        <div className="grow bg-stone-400 p-5 flex flex-col">
           <MediaPlayer/>
         </div>
       </div>
